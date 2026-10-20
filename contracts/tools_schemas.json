@@ -1,0 +1,714 @@
+{
+  "version": 1,
+  "tools": [
+    {
+      "name": "get_product",
+      "description": "Показывает цену, лимит и остатки товара. Ничего не меняет; неизвестный товар — PRODUCT_NOT_FOUND.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "product_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "price_coins": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "user_limit": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "stock": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "price_coins",
+                  "user_limit",
+                  "stock"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "PRODUCT_NOT_FOUND",
+                      "USER_NOT_FOUND",
+                      "OUT_OF_STOCK",
+                      "USER_LIMIT_EXCEEDED",
+                      "INSUFFICIENT_COINS",
+                      "ORDER_NOT_FOUND",
+                      "ORDER_STATUS_ERROR"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "list_products",
+      "description": "Показывает весь каталог: id, название, цену, лимит на участника и остатки по размерам, в порядке id. Нужен, когда клиент ещё не знает, какие товары есть. Ничего не меняет; отказов по правилам Лавки нет.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "products": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "price_coins": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "user_limit": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "stock": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_coins",
+                        "user_limit",
+                        "stock"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "products"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "PRODUCT_NOT_FOUND",
+                      "USER_NOT_FOUND",
+                      "OUT_OF_STOCK",
+                      "USER_LIMIT_EXCEEDED",
+                      "INSUFFICIENT_COINS",
+                      "ORDER_NOT_FOUND",
+                      "ORDER_STATUS_ERROR"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "get_coin_balance",
+      "description": "Показывает текущий баланс коинов участника по user_id. Ничего не меняет и не создаёт пользователя; неизвестный участник — USER_NOT_FOUND.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "balance": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "user_id",
+                  "balance"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "PRODUCT_NOT_FOUND",
+                      "USER_NOT_FOUND",
+                      "OUT_OF_STOCK",
+                      "USER_LIMIT_EXCEEDED",
+                      "INSUFFICIENT_COINS",
+                      "ORDER_NOT_FOUND",
+                      "ORDER_STATUS_ERROR"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "get_order_status",
+      "description": "Показывает состояние заказа (created, cancelled или picked_up) по order_id. Ничего не меняет; неизвестный заказ — ORDER_NOT_FOUND.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "order_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "order_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "created",
+                      "cancelled",
+                      "picked_up"
+                    ]
+                  }
+                },
+                "required": [
+                  "order_id",
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "PRODUCT_NOT_FOUND",
+                      "USER_NOT_FOUND",
+                      "OUT_OF_STOCK",
+                      "USER_LIMIT_EXCEEDED",
+                      "INSUFFICIENT_COINS",
+                      "ORDER_NOT_FOUND",
+                      "ORDER_STATUS_ERROR"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "create_order",
+      "description": "Создаёт заказ, когда участник хочет купить товар: за одну транзакцию записывает заказ, списывает коины и резервирует остаток. quantity по умолчанию 1; от 3 единиц действует скидка 10% (итог округляется вниз). Проверки по порядку: USER_NOT_FOUND, PRODUCT_NOT_FOUND, OUT_OF_STOCK (нет размера или мало остатка), USER_LIMIT_EXCEEDED, INSUFFICIENT_COINS. При любом отказе данные не меняются.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "product_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "size": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          }
+        },
+        "required": [
+          "user_id",
+          "product_id",
+          "size"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "order_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "status": {
+                    "type": "string",
+                    "const": "created"
+                  },
+                  "total_price": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "order_id",
+                  "status",
+                  "total_price"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "PRODUCT_NOT_FOUND",
+                      "USER_NOT_FOUND",
+                      "OUT_OF_STOCK",
+                      "USER_LIMIT_EXCEEDED",
+                      "INSUFFICIENT_COINS",
+                      "ORDER_NOT_FOUND",
+                      "ORDER_STATUS_ERROR"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancel_order",
+      "description": "Отменяет ещё не выданный заказ (статус created): возвращает на склад товар, а участнику — ровно ту сумму, что была списана при создании, один раз. Выданный (picked_up) или уже отменённый заказ отменить нельзя — ORDER_STATUS_ERROR; неизвестный заказ — ORDER_NOT_FOUND.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "order_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "order_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "status": {
+                    "type": "string",
+                    "const": "cancelled"
+                  }
+                },
+                "required": [
+                  "order_id",
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "PRODUCT_NOT_FOUND",
+                      "USER_NOT_FOUND",
+                      "OUT_OF_STOCK",
+                      "USER_LIMIT_EXCEEDED",
+                      "INSUFFICIENT_COINS",
+                      "ORDER_NOT_FOUND",
+                      "ORDER_STATUS_ERROR"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "confirm_pickup",
+      "description": "Отмечает, что участник забрал заказ: меняет только статус created → picked_up, коины и остатки не трогает (они уже списаны при создании). Отменённый или уже выданный заказ — ORDER_STATUS_ERROR; неизвестный заказ — ORDER_NOT_FOUND.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "order_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": true
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "order_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "status": {
+                    "type": "string",
+                    "const": "picked_up"
+                  }
+                },
+                "required": [
+                  "order_id",
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "const": false
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "PRODUCT_NOT_FOUND",
+                      "USER_NOT_FOUND",
+                      "OUT_OF_STOCK",
+                      "USER_LIMIT_EXCEEDED",
+                      "INSUFFICIENT_COINS",
+                      "ORDER_NOT_FOUND",
+                      "ORDER_STATUS_ERROR"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "ok",
+              "error"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  ]
+}
